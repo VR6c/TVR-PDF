@@ -15,10 +15,23 @@ npm run preview      # serve the production build
 Requires Node 22+. Tests:
 
 ```bash
-npm test             # unit + integration (Vitest, 46 tests)
+npm test             # unit + integration (Vitest, 79 tests)
 npx playwright install chromium   # once
-npm run test:e2e     # 16 end-to-end tests against the production build (port 4399)
+npm run test:e2e     # 22 end-to-end tests against the production build (port 4399)
 npm run lint
+```
+
+## Project layout
+
+```
+src/components/   React UI: annotations, dialogs, layout, pdf viewer, sidebar, toolbar
+src/lib/          PDF engine, export/redact/compress/forms, storage (Dexie), autosave, geometry
+src/stores/       Zustand stores (document, tools, viewer, UI, OCR, signatures, theme)
+src/workers/      PDF worker
+src/types/        Shared types
+tests/            unit, integration and e2e (Playwright)
+docs/             architecture, security, deployment and more
+scripts/          OCR asset copy, icon generation
 ```
 
 ## What it does
