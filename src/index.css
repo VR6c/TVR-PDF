@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #eceef1;
+  --border: #d9dce1;
+  --text: #1c1f24;
+  --text-muted: #5b6370;
+  --accent: #2563eb;
+  --accent-text: #ffffff;
+  --accent-soft: #e3ecfd;
+  --danger: #c81e1e;
+  --workspace: #e3e5e9;
+}
+
+.dark {
+  --bg: #15171a;
+  --surface: #1e2125;
+  --surface-2: #2a2e33;
+  --border: #3a3f46;
+  --text: #e8eaed;
+  --text-muted: #9aa1ab;
+  --accent: #5b8def;
+  --accent-text: #0b1020;
+  --accent-soft: #23304d;
+  --danger: #f87171;
+  --workspace: #101215;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-workspace: var(--workspace);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Dynamic viewport height keeps the status bar above mobile browser chrome. */
+#root {
+  height: 100dvh;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+/* Inputs under 16px make iOS Safari zoom the page on focus. */
+@media (pointer: coarse) {
+  input:not([type='checkbox'], [type='range'], [type='color']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Horizontal strips (tools, tabs) scroll without a visible bar. */
+.scroll-strip {
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-strip::-webkit-scrollbar { display: none; }
+.scroll-strip > * { scroll-snap-align: start; }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Edit text tool: outline the run under the pointer. */
+.textLayer.edit-text span:hover { outline: 1px solid #2563eb; background: rgba(37, 99, 235, 0.12); cursor: pointer; }
