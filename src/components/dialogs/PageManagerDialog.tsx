@@ -12,7 +12,7 @@ import { Modal } from '../common/Modal'
 import { Notice } from '../common/Notice'
 import { Thumbnail } from '../sidebar/Thumbnail'
 import { saveBytes } from '../../lib/exportActions'
-import { inputClass } from '../common/Button'
+import { Select } from '../common/Select'
 
 const buf = (u: Uint8Array) => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer
 
@@ -168,9 +168,7 @@ export function PageManagerDialog() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-muted">Paper size of selected pages:</span>
-          <select aria-label="Paper size" value={paper} onChange={(e) => setPaper(e.target.value as keyof typeof PAPER_SIZES)} className={inputClass}>
-            {Object.keys(PAPER_SIZES).map((k) => <option key={k}>{k}</option>)}
-          </select>
+          <Select aria-label="Paper size" value={paper} onChange={(v) => setPaper(v as keyof typeof PAPER_SIZES)} options={Object.keys(PAPER_SIZES).map((k) => ({ value: k }))} />
           <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={landscape} onChange={(e) => setLandscape(e.target.checked)} /> Landscape</label>
           <button type="button" className={btn} disabled={busy || encrypted || needSelection} onClick={act(() => {
             const [w, h] = PAPER_SIZES[paper]

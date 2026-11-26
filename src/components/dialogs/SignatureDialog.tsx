@@ -5,7 +5,8 @@ import { useSignatures } from '../../stores/signatures'
 import { useTools } from '../../stores/tools'
 import { useUI } from '../../stores/ui'
 import { MAX_SAVED_SIGNATURES } from '../../types'
-import { Button, DialogActions, inputClass } from '../common/Button'
+import { Button, DialogActions } from '../common/Button'
+import { Select } from '../common/Select'
 import { Modal } from '../common/Modal'
 import { Notice } from '../common/Notice'
 
@@ -169,7 +170,7 @@ export function SignatureDialog() {
           <div className="flex flex-col gap-2">
             <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Your name" aria-label="Typed signature" className="rounded border border-border bg-bg px-3 py-2" />
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
-              <select value={font} onChange={(e) => setFont(e.target.value)} aria-label="Signature font" className={`${inputClass} text-text`}>{SCRIPT_FONTS.map(([n, f]) => <option key={n} value={f}>{n}</option>)}</select>
+              <Select aria-label="Signature font" value={font} onChange={setFont} options={SCRIPT_FONTS.map(([label, value]) => ({ value, label }))} />
               <label className="flex items-center gap-1">Size <input type="range" min={32} max={120} value={size} onChange={(e) => setSize(Number(e.target.value))} /></label>
               <label className="flex items-center gap-1">Ink <input type="color" value={color} onChange={(e) => setColor(e.target.value)} /></label>
             </div>

@@ -7,7 +7,8 @@ import type { OcrWord } from '../../stores/ocr'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
 import type { Rotation } from '../../types'
-import { Button, DialogActions, inputClass } from '../common/Button'
+import { Button, DialogActions } from '../common/Button'
+import { Select } from '../common/Select'
 import { Modal } from '../common/Modal'
 import { Notice } from '../common/Notice'
 
@@ -102,7 +103,7 @@ export function OcrDialog() {
       <div className="flex flex-col gap-3">
         <p className="text-muted">Runs entirely in your browser. Recognized text is added to the exported PDF as an invisible, searchable layer.</p>
         <label className="flex items-center justify-between gap-2">Language
-          <select value={lang} onChange={(e) => setLang(e.target.value)} disabled={busy} className={inputClass}>{LANGS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}</select>
+          <Select aria-label="Language" value={lang} onChange={setLang} disabled={busy} options={LANGS.map(([value, label]) => ({ value, label }))} />
         </label>
         <label className="flex items-center justify-between gap-2">Pages (blank = all)
           <input value={range} onChange={(e) => setRange(e.target.value)} disabled={busy} placeholder="1-3, 5" className="w-40 rounded border border-border bg-bg px-2 py-1" />

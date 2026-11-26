@@ -11,6 +11,7 @@ import { useViewer } from '../../stores/viewer'
 import { useUI } from '../../stores/ui'
 import type { Annotation } from '../../types'
 import { inputClass } from '../common/Button'
+import { Select } from '../common/Select'
 
 const SWATCHES = ['#e11d48', '#f97316', '#facc15', '#22c55e', '#2563eb', '#7c3aed', '#111827']
 const FONTS = ['Helvetica', 'Times New Roman', 'Courier New']
@@ -122,9 +123,7 @@ export function PropertiesPanel() {
             <input type="number" min={6} max={96} value={v.fontSize} onChange={(e) => change({ fontSize: Math.min(96, Math.max(6, Number(e.target.value) || 16)) })} className={`${inputClass} text-text`} />
           </Row>
           <Row label="Font">
-            <select value={v.fontFamily} onChange={(e) => change({ fontFamily: e.target.value })} className={`${inputClass} text-text`}>
-              {FONTS.map((f) => <option key={f}>{f}</option>)}
-            </select>
+            <Select aria-label="Font" value={v.fontFamily} onChange={(fontFamily) => change({ fontFamily })} options={FONTS.map((f) => ({ value: f }))} />
           </Row>
           <Row label="Alignment">
             <div className="flex gap-1">
@@ -137,9 +136,7 @@ export function PropertiesPanel() {
       )}
       {type === 'stamp' && !selected && (
         <Row label="Stamp">
-          <select value={t.stamp} onChange={(e) => t.set({ stamp: e.target.value as typeof t.stamp })} className={`${inputClass} text-text`}>
-            {STAMP_KINDS.map((k) => <option key={k}>{k}</option>)}
-          </select>
+          <Select aria-label="Stamp" value={t.stamp} onChange={(stamp) => t.set({ stamp: stamp as typeof t.stamp })} options={STAMP_KINDS.map((k) => ({ value: k }))} />
         </Row>
       )}
       {t.tool === 'link' && !selected && <p className="text-xs text-muted">Drag an area on the page, then set where it goes. Links work in the exported PDF.</p>}
@@ -150,10 +147,12 @@ export function PropertiesPanel() {
           </Row>
           {selected.url && !isSafeUrl(selected.url) && <p role="alert" className="text-xs text-red-600">Only http(s):// and mailto: addresses are allowed.</p>}
           <Row label="…or jump to page">
-            <select aria-label="Link target page" value={selected.targetPageId ?? ''} onChange={(e) => useDocument.getState().update(selected.id, { targetPageId: (e.target.value || null) as typeof selected.targetPageId, url: '' })} className={`${inputClass} text-text`}>
-              <option value="">None</option>
-              {pages.map((p, i) => <option key={p.pageId} value={p.pageId}>Page {i + 1}</option>)}
-            </select>
+            <Select
+              aria-label="Link target page"
+              value={selected.targetPageId ?? ''}
+              onChange={(v) => useDocument.getState().update(selected.id, { targetPageId: (v || null) as typeof selected.targetPageId, url: '' })}
+              options={[{ value: '', label: 'None' }, ...pages.map((p, i) => ({ value: p.pageId, label: `Page ${i + 1}` }))]}
+            />
           </Row>
         </>
       )}
@@ -162,9 +161,12 @@ export function PropertiesPanel() {
           {!selected && <p className="text-xs text-muted">Drag an area on the page to add a fillable field. It becomes a real form field when you export.</p>}
           {!selected && (
             <Row label="Field type">
-              <select aria-label="Field type" value={t.fieldType} onChange={(e) => t.set({ fieldType: e.target.value as typeof t.fieldType })} className={`${inputClass} text-text`}>
-                <option value="text">Text</option><option value="checkbox">Checkbox</option><option value="dropdown">Dropdown</option>
-              </select>
+              <Select
+                aria-label="Field type"
+                value={t.fieldType}
+                onChange={(fieldType) => t.set({ fieldType: fieldType as typeof t.fieldType })}
+                options={[{ value: 'text', label: 'Text' }, { value: 'checkbox', label: 'Checkbox' }, { value: 'dropdown', label: 'Dropdown' }]}
+              />
             </Row>
           )}
           {selected?.type === 'field' && (
@@ -183,10 +185,12 @@ export function PropertiesPanel() {
       )}
       {t.tool === 'signature' && (
         <Row label="Signature to place">
-          <select value={t.signatureId ?? ''} onChange={(e) => t.set({ signatureId: (e.target.value || null) as typeof t.signatureId })} className={`${inputClass} text-text`}>
-            <option value="">Choose…</option>
-            {sigs.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
-          </select>
+          <Select
+            aria-label="Signature"
+            value={t.signatureId ?? ''}
+            onChange={(v) => t.set({ signatureId: (v || null) as typeof t.signatureId })}
+            options={[{ value: '', label: 'Choose…' }, ...sigs.map((s) => ({ value: s.id, label: s.label }))]}
+          />
         </Row>
       )}
       {(t.tool === 'redact' || selected?.type === 'redaction' || marks > 0) && (
@@ -203,16 +207,15 @@ export function PropertiesPanel() {
         <div className="mt-1 flex flex-col gap-2 border-t border-border pt-3">
           {selected.type !== 'highlight' && (
             <Row label="Move to page">
-              <select
-                value={pages.findIndex((p) => p.pageId === selected.pageId) + 1}
-                onChange={(e) => {
-                  const target = pages[Number(e.target.value) - 1]
+              <Select
+                aria-label="Move to page"
+                value={String(pages.findIndex((p) => p.pageId === selected.pageId) + 1)}
+                onChange={(v) => {
+                  const target = pages[Number(v) - 1]
                   if (target && target.pageId !== selected.pageId) useDocument.getState().moveToPage(selected.id, target.pageId, { x: 40, y: 40 })
                 }}
-                className={`${inputClass} text-text`}
-              >
-                {Array.from({ length: pageCount }, (_, i) => <option key={i} value={i + 1}>Page {i + 1}</option>)}
-              </select>
+                options={Array.from({ length: pageCount }, (_, i) => ({ value: String(i + 1), label: `Page ${i + 1}` }))}
+              />
             </Row>
           )}
           <button

@@ -7,7 +7,8 @@ import { makeZip } from '../../lib/zip'
 import { useDocument } from '../../stores/document'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
-import { Button, DialogActions, inputClass } from '../common/Button'
+import { Button, DialogActions } from '../common/Button'
+import { Select } from '../common/Select'
 import { Modal } from '../common/Modal'
 import { Notice } from '../common/Notice'
 
@@ -78,14 +79,10 @@ export function ImagesDialog() {
         <p className="text-muted">Pages are drawn with your annotations. Everything happens on this device.</p>
         {marks && <Notice kind="error">Unapplied redaction marks would not be hidden. Apply or delete them first.</Notice>}
         <label className="flex items-center justify-between gap-2">Format
-          <select value={format} onChange={(e) => setFormat(e.target.value as 'png' | 'jpeg')} className={inputClass}>
-            <option value="png">PNG (lossless)</option><option value="jpeg">JPEG (smaller)</option>
-          </select>
+          <Select aria-label="Format" value={format} onChange={(v) => setFormat(v as 'png' | 'jpeg')} options={[{ value: 'png', label: 'PNG (lossless)' }, { value: 'jpeg', label: 'JPEG (smaller)' }]} />
         </label>
         <label className="flex items-center justify-between gap-2">Resolution
-          <select value={dpi} onChange={(e) => setDpi(Number(e.target.value))} className={inputClass}>
-            {[72, 96, 150, 200, 300].map((d) => <option key={d} value={d}>{d} DPI</option>)}
-          </select>
+          <Select aria-label="Resolution" value={String(dpi)} onChange={(v) => setDpi(Number(v))} options={[72, 96, 150, 200, 300].map((d) => ({ value: String(d), label: `${d} DPI` }))} />
         </label>
         <label className="flex items-center justify-between gap-2">Pages
           <input value={range} onChange={(e) => setRange(e.target.value)} placeholder={`all (1-${pageCount}), or e.g. ${currentPage}`} aria-label="Pages to export" className="w-48 rounded border border-border bg-bg px-2 py-1" />

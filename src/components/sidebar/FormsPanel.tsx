@@ -3,6 +3,7 @@ import { listFormFieldsInWorker, fillFormInWorker } from '../../lib/formActions'
 import type { FormFieldInfo } from '../../lib/pdf/forms'
 import { useDocument } from '../../stores/document'
 import { inputClass } from '../common/Button'
+import { Select } from '../common/Select'
 
 export function FormsPanel() {
   const bytes = useDocument((s) => s.baseBytes)
@@ -44,10 +45,14 @@ export function FormsPanel() {
             {f.kind === 'text' && <input disabled={f.readOnly} value={String(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} className={`${inputClass} text-sm text-text`} />}
             {f.kind === 'checkbox' && <input type="checkbox" disabled={f.readOnly} checked={Boolean(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.checked })} className="size-4" />}
             {(f.kind === 'dropdown' || f.kind === 'radio') && (
-              <select disabled={f.readOnly} value={String(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} className={`${inputClass} text-sm text-text`}>
-                <option value="">—</option>
-                {f.options.map((o) => <option key={o}>{o}</option>)}
-              </select>
+              <Select
+                aria-label={f.name}
+                disabled={f.readOnly}
+                value={String(v ?? f.value)}
+                onChange={(next) => setValues({ ...values, [f.name]: next })}
+                options={[{ value: '', label: '—' }, ...f.options.map((o) => ({ value: o }))]}
+                className="text-sm"
+              />
             )}
           </label>
         )

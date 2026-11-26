@@ -7,6 +7,7 @@ import { callWorker } from '../../lib/pdf/workerClient'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
 import { Button, DialogActions, inputClass } from '../common/Button'
+import { Select } from '../common/Select'
 import { Modal } from '../common/Modal'
 import { Notice } from '../common/Notice'
 
@@ -75,9 +76,7 @@ export function ExportDialog({ mode }: { mode: 'export' | 'print' }) {
         {compress && (
           <div className="ml-6 flex flex-col gap-2 text-sm">
             <label className="flex items-center justify-between gap-2">Largest image edge
-              <select value={maxDim} onChange={(e) => setMaxDim(Number(e.target.value))} className={inputClass}>
-                {[1000, 1600, 2400].map((n) => <option key={n} value={n}>{n}px</option>)}
-              </select>
+              <Select aria-label="Largest image edge" value={String(maxDim)} onChange={(v) => setMaxDim(Number(v))} options={[1000, 1600, 2400].map((n) => ({ value: String(n), label: `${n}px` }))} />
             </label>
             <label className="flex items-center justify-between gap-2">JPEG quality {Math.round(quality * 100)}%
               <input type="range" min={0.4} max={0.95} step={0.05} value={quality} onChange={(e) => setQuality(Number(e.target.value))} />
@@ -106,9 +105,12 @@ export function ExportDialog({ mode }: { mode: 'export' | 'print' }) {
           {decorations.pageNumbers && (
             <div className="ml-6 flex gap-2">
               <input aria-label="Page number format" value={decorations.pageNumbers.format} onChange={(e) => setDecorations({ ...decorations, pageNumbers: { ...decorations.pageNumbers!, format: e.target.value } })} className="min-w-0 flex-1 rounded border border-border bg-bg px-2 py-1" />
-              <select aria-label="Page number position" value={decorations.pageNumbers.position} onChange={(e) => setDecorations({ ...decorations, pageNumbers: { ...decorations.pageNumbers!, position: e.target.value as 'left' | 'center' | 'right' } })} className={inputClass}>
-                <option value="left">Left</option><option value="center">Center</option><option value="right">Right</option>
-              </select>
+              <Select
+                aria-label="Page number position"
+                value={decorations.pageNumbers.position}
+                onChange={(position) => setDecorations({ ...decorations, pageNumbers: { ...decorations.pageNumbers!, position: position as 'left' | 'center' | 'right' } })}
+                options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]}
+              />
             </div>
           )}
         </fieldset>
