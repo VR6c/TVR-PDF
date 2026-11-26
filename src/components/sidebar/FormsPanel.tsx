@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { listFormFieldsInWorker, fillFormInWorker } from '../../lib/formActions'
 import type { FormFieldInfo } from '../../lib/pdf/forms'
 import { useDocument } from '../../stores/document'
+import { inputClass } from '../common/Button'
 
 export function FormsPanel() {
   const bytes = useDocument((s) => s.baseBytes)
@@ -40,10 +41,10 @@ export function FormsPanel() {
         return (
           <label key={f.name} className="flex flex-col gap-1 text-xs text-muted">
             <span className="break-words">{f.name}</span>
-            {f.kind === 'text' && <input disabled={f.readOnly} value={String(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} className="rounded border border-border bg-bg px-2 py-1 text-sm text-text" />}
+            {f.kind === 'text' && <input disabled={f.readOnly} value={String(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} className={`${inputClass} text-sm text-text`} />}
             {f.kind === 'checkbox' && <input type="checkbox" disabled={f.readOnly} checked={Boolean(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.checked })} className="size-4" />}
             {(f.kind === 'dropdown' || f.kind === 'radio') && (
-              <select disabled={f.readOnly} value={String(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} className="rounded border border-border bg-bg px-2 py-1 text-sm text-text">
+              <select disabled={f.readOnly} value={String(v ?? f.value)} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} className={`${inputClass} text-sm text-text`}>
                 <option value="">—</option>
                 {f.options.map((o) => <option key={o}>{o}</option>)}
               </select>

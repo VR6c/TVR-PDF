@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useOpener } from '../../stores/opener'
+import { Button, DialogActions } from './Button'
 
 export function CombineDialog() {
   const pending = useOpener((s) => s.pendingCombine)
@@ -28,11 +29,11 @@ export function CombineDialog() {
             <li key={i} className="truncate">{f.name}</li>
           ))}
         </ol>
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={cancel} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Cancel</button>
-          <button type="button" onClick={() => void openFirst()} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Open first only</button>
-          <button type="button" autoFocus onClick={() => void confirm()} className="rounded-md bg-accent px-3 py-1.5 text-accent-text">Combine</button>
-        </div>
+        <DialogActions>
+          <Button onClick={cancel}>Cancel</Button>
+          <Button onClick={() => void openFirst()}>Open first only</Button>
+          <Button variant="primary" autoFocus onClick={() => void confirm()}>Combine</Button>
+        </DialogActions>
       </div>
     </dialog>
   )

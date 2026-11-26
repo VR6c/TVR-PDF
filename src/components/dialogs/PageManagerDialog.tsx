@@ -9,8 +9,10 @@ import { useNotice } from '../../stores/notice'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 import { Thumbnail } from '../sidebar/Thumbnail'
 import { saveBytes } from '../../lib/exportActions'
+import { inputClass } from '../common/Button'
 
 const buf = (u: Uint8Array) => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer
 
@@ -137,7 +139,7 @@ export function PageManagerDialog() {
   return (
     <Modal title="Organize pages" onClose={close} wide>
       <div className="flex flex-col gap-3">
-        {encrypted && <p role="alert" className="rounded border border-red-300 bg-red-50 p-2 text-red-800">Page editing is not supported for encrypted PDFs.</p>}
+        {encrypted && <Notice kind="error">Page editing is not supported for encrypted PDFs.</Notice>}
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className={btn} disabled={busy || encrypted || needSelection} onClick={act(() => rotatePages(selected, 270))}><RotateCcw size={14} aria-hidden /> Rotate left</button>
           <button type="button" className={btn} disabled={busy || encrypted || needSelection} onClick={act(() => rotatePages(selected, 90))}><RotateCw size={14} aria-hidden /> Rotate right</button>
@@ -166,7 +168,7 @@ export function PageManagerDialog() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-muted">Paper size of selected pages:</span>
-          <select aria-label="Paper size" value={paper} onChange={(e) => setPaper(e.target.value as keyof typeof PAPER_SIZES)} className="rounded border border-border bg-bg px-2 py-1.5">
+          <select aria-label="Paper size" value={paper} onChange={(e) => setPaper(e.target.value as keyof typeof PAPER_SIZES)} className={inputClass}>
             {Object.keys(PAPER_SIZES).map((k) => <option key={k}>{k}</option>)}
           </select>
           <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={landscape} onChange={(e) => setLandscape(e.target.checked)} /> Landscape</label>
@@ -176,7 +178,7 @@ export function PageManagerDialog() {
           })}><Ruler size={14} aria-hidden /> Set size</button>
           <span className="text-xs text-muted">Content is not scaled: it stays at the top-left.</span>
         </div>
-        {error && <p role="alert" className="text-red-600">{error}</p>}
+        {error && <Notice kind="error" plain>{error}</Notice>}
         <p className="text-xs text-muted">Click to select (Shift or Ctrl/Cmd for several). Drag a page to reorder. Changes apply immediately and can be undone.</p>
         <div ref={setRoot} className="max-h-[50dvh] overflow-y-auto rounded border border-border bg-workspace p-2">
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2">

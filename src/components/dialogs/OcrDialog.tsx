@@ -7,7 +7,9 @@ import type { OcrWord } from '../../stores/ocr'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
 import type { Rotation } from '../../types'
+import { Button, DialogActions, inputClass } from '../common/Button'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 
 const LANGS = [
   ['eng', 'English'],
@@ -100,14 +102,14 @@ export function OcrDialog() {
       <div className="flex flex-col gap-3">
         <p className="text-muted">Runs entirely in your browser. Recognized text is added to the exported PDF as an invisible, searchable layer.</p>
         <label className="flex items-center justify-between gap-2">Language
-          <select value={lang} onChange={(e) => setLang(e.target.value)} disabled={busy} className="rounded border border-border bg-bg px-2 py-1">{LANGS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}</select>
+          <select value={lang} onChange={(e) => setLang(e.target.value)} disabled={busy} className={inputClass}>{LANGS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}</select>
         </label>
         <label className="flex items-center justify-between gap-2">Pages (blank = all)
           <input value={range} onChange={(e) => setRange(e.target.value)} disabled={busy} placeholder="1-3, 5" className="w-40 rounded border border-border bg-bg px-2 py-1" />
         </label>
         {busy && <progress value={progress} max={1} aria-label="OCR progress" className="w-full" />}
         {status && <p role="status" className="text-muted">{status}</p>}
-        {error && <p role="alert" className="text-red-600">{error}</p>}
+        {error && <Notice kind="error" plain>{error}</Notice>}
         {total > 0 && (
           <details>
             <summary className="cursor-pointer">{done.size} page{done.size === 1 ? '' : 's'} recognized, {total} words</summary>
@@ -116,10 +118,10 @@ export function OcrDialog() {
           </details>
         )}
         <p className="text-xs text-muted">Exported text uses the standard Latin font set: characters outside it (including Khmer) are searchable only in the on-screen results here, not embedded as PDF text.</p>
-        <div className="flex justify-end gap-2">
-          {busy ? <button type="button" onClick={() => { cancelled.current = true; stop.current?.() }} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Cancel</button> : <button type="button" onClick={close} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Close</button>}
-          <button type="button" disabled={busy} onClick={() => void run()} className="rounded-md bg-accent px-4 py-1.5 font-medium text-accent-text disabled:opacity-50">Start OCR</button>
-        </div>
+        <DialogActions>
+          {busy ? <Button onClick={() => { cancelled.current = true; stop.current?.() }}>Cancel</Button> : <Button onClick={close}>Close</Button>}
+          <Button variant="primary" disabled={busy} onClick={() => void run()}>Start OCR</Button>
+        </DialogActions>
       </div>
     </Modal>
   )

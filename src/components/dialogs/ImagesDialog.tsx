@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { downloadBlob } from '../../lib/download'
 import { runExport } from '../../lib/exportActions'
 import { openPdf } from '../../lib/pdf/engine'
 import { parsePageRange } from '../../lib/pdf/pageRange'
@@ -6,7 +7,9 @@ import { makeZip } from '../../lib/zip'
 import { useDocument } from '../../stores/document'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
+import { Button, DialogActions, inputClass } from '../common/Button'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 
 /** Renders pages of the edited document (with annotations) to PNG or JPEG; several pages come as one ZIP. */
 export function ImagesDialog() {
@@ -62,8 +65,8 @@ export function ImagesDialog() {
       void pdf.loadingTask.destroy()
       const one = files.length === 1
       const bytes = one ? files[0].data : makeZip(files)
-      const how = await saveFile(bytes, one ? files[0].name : `${base}-images.zip`, one ? `image/${format}` : 'application/zip')
-      if (how !== 'cancelled') setMessage({ kind: 'ok', text: `${files.length} image${one ? '' : 's'} ${how === 'saved' ? 'saved' : 'downloaded'}.` })
+      downloadBlob(bytes as BlobPart, one ? files[0].name : `${base}-images.zip`, one ? `image/${format}` : 'application/zip')
+      setMessage({ kind: 'ok', text: `${files.length} image${one ? '' : 's'} downloaded.` })
     } finally {
       setBusy(false)
     }
@@ -73,14 +76,14 @@ export function ImagesDialog() {
     <Modal title="Export pages as images" onClose={close}>
       <div className="flex flex-col gap-3">
         <p className="text-muted">Pages are drawn with your annotations. Everything happens on this device.</p>
-        {marks && <p role="alert" className="rounded border border-red-300 bg-red-50 p-2 text-red-800">Unapplied redaction marks would not be hidden. Apply or delete them first.</p>}
+        {marks && <Notice kind="error">Unapplied redaction marks would not be hidden. Apply or delete them first.</Notice>}
         <label className="flex items-center justify-between gap-2">Format
-          <select value={format} onChange={(e) => setFormat(e.target.value as 'png' | 'jpeg')} className="rounded border border-border bg-bg px-2 py-1">
+          <select value={format} onChange={(e) => setFormat(e.target.value as 'png' | 'jpeg')} className={inputClass}>
             <option value="png">PNG (lossless)</option><option value="jpeg">JPEG (smaller)</option>
           </select>
         </label>
         <label className="flex items-center justify-between gap-2">Resolution
-          <select value={dpi} onChange={(e) => setDpi(Number(e.target.value))} className="rounded border border-border bg-bg px-2 py-1">
+          <select value={dpi} onChange={(e) => setDpi(Number(e.target.value))} className={inputClass}>
             {[72, 96, 150, 200, 300].map((d) => <option key={d} value={d}>{d} DPI</option>)}
           </select>
         </label>
@@ -88,25 +91,12 @@ export function ImagesDialog() {
           <input value={range} onChange={(e) => setRange(e.target.value)} placeholder={`all (1-${pageCount}), or e.g. ${currentPage}`} aria-label="Pages to export" className="w-48 rounded border border-border bg-bg px-2 py-1" />
         </label>
         {busy && <progress value={progress} max={1} aria-label="Progress" className="w-full" />}
-        {message && <p role="status" className={`rounded border p-2 font-medium ${message.kind === 'error' ? 'border-red-400 text-red-500' : 'border-green-500 bg-surface-2 text-text'}`}>{message.kind === 'ok' ? '✓ ' : ''}{message.text}</p>}
-        <div className="flex justify-end gap-2">
-          {busy ? <button type="button" onClick={() => abort.current?.abort()} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Cancel</button> : <button type="button" onClick={close} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Close</button>}
-          <button type="button" disabled={busy || marks} onClick={() => void go()} className="rounded-md bg-accent px-4 py-1.5 font-medium text-accent-text disabled:opacity-50">{busy ? 'Working…' : 'Export'}</button>
-        </div>
+        {message && <Notice kind={message.kind}>{message.text}</Notice>}
+        <DialogActions>
+          {busy ? <Button onClick={() => abort.current?.abort()}>Cancel</Button> : <Button onClick={close}>Close</Button>}
+          <Button variant="primary" disabled={busy || marks} onClick={() => void go()}>{busy ? 'Working…' : 'Export'}</Button>
+        </DialogActions>
       </div>
     </Modal>
   )
-}
-
-/** Saves any file type (saveBytes is PDF-specific). */
-async function saveFile(bytes: Uint8Array, name: string, mime: string): Promise<'saved' | 'downloaded' | 'cancelled'> {
-  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: mime }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  a.style.display = 'none'
-  document.body.appendChild(a)
-  a.click()
-  setTimeout(() => { a.remove(); URL.revokeObjectURL(url) }, 60000)
-  return 'downloaded'
 }

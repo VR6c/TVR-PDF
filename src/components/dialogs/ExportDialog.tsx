@@ -6,7 +6,9 @@ import { useOcr } from '../../stores/ocr'
 import { callWorker } from '../../lib/pdf/workerClient'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
+import { Button, DialogActions, inputClass } from '../common/Button'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 
 export function ExportDialog({ mode }: { mode: 'export' | 'print' }) {
   const close = useUI((s) => s.close)
@@ -73,7 +75,7 @@ export function ExportDialog({ mode }: { mode: 'export' | 'print' }) {
         {compress && (
           <div className="ml-6 flex flex-col gap-2 text-sm">
             <label className="flex items-center justify-between gap-2">Largest image edge
-              <select value={maxDim} onChange={(e) => setMaxDim(Number(e.target.value))} className="rounded border border-border bg-bg px-2 py-1">
+              <select value={maxDim} onChange={(e) => setMaxDim(Number(e.target.value))} className={inputClass}>
                 {[1000, 1600, 2400].map((n) => <option key={n} value={n}>{n}px</option>)}
               </select>
             </label>
@@ -104,7 +106,7 @@ export function ExportDialog({ mode }: { mode: 'export' | 'print' }) {
           {decorations.pageNumbers && (
             <div className="ml-6 flex gap-2">
               <input aria-label="Page number format" value={decorations.pageNumbers.format} onChange={(e) => setDecorations({ ...decorations, pageNumbers: { ...decorations.pageNumbers!, format: e.target.value } })} className="min-w-0 flex-1 rounded border border-border bg-bg px-2 py-1" />
-              <select aria-label="Page number position" value={decorations.pageNumbers.position} onChange={(e) => setDecorations({ ...decorations, pageNumbers: { ...decorations.pageNumbers!, position: e.target.value as 'left' | 'center' | 'right' } })} className="rounded border border-border bg-bg px-2 py-1">
+              <select aria-label="Page number position" value={decorations.pageNumbers.position} onChange={(e) => setDecorations({ ...decorations, pageNumbers: { ...decorations.pageNumbers!, position: e.target.value as 'left' | 'center' | 'right' } })} className={inputClass}>
                 <option value="left">Left</option><option value="center">Center</option><option value="right">Right</option>
               </select>
             </div>
@@ -115,27 +117,23 @@ export function ExportDialog({ mode }: { mode: 'export' | 'print' }) {
             <label className="flex items-center gap-2"><input type="checkbox" checked={protect} onChange={(e) => setProtect(e.target.checked)} /> Protect with a password (AES-256)</label>
             {protect && (
               <div className="ml-6 flex flex-col gap-2 text-sm">
-                <input type="password" autoComplete="new-password" aria-label="New password" placeholder="Password" value={pw} onChange={(e) => setPw(e.target.value)} className="rounded border border-border bg-bg px-2 py-1" />
-                <input type="password" autoComplete="new-password" aria-label="Confirm password" placeholder="Confirm password" value={pw2} onChange={(e) => setPw2(e.target.value)} className="rounded border border-border bg-bg px-2 py-1" />
+                <input type="password" autoComplete="new-password" aria-label="New password" placeholder="Password" value={pw} onChange={(e) => setPw(e.target.value)} className={inputClass} />
+                <input type="password" autoComplete="new-password" aria-label="Confirm password" placeholder="Confirm password" value={pw2} onChange={(e) => setPw2(e.target.value)} className={inputClass} />
                 <p className="text-xs text-muted">The same password is needed to open the file. If you forget it, it cannot be recovered.</p>
               </div>
             )}
           </>
         )}
-        {blocked && <p role="alert" className="rounded border border-red-300 bg-red-50 p-2 text-red-800">{blocked}</p>}
+        {blocked && <Notice kind="error">{blocked}</Notice>}
         {busy && <progress value={progress} max={1} aria-label="Export progress" className="w-full" />}
-        {message && <p role="status" className={`rounded border p-2 font-medium ${message.kind === 'error' ? 'border-red-400 text-red-500' : 'border-green-500 bg-surface-2 text-text'}`}>{message.kind === 'ok' ? '✓ ' : ''}{message.text}</p>}
+        {message && <Notice kind={message.kind}>{message.text}</Notice>}
         {sizes && <p className="text-muted">Original {fmt(sizes.before)} → exported {fmt(sizes.after)}</p>}
-        <div className="flex justify-end gap-2">
-          {busy ? (
-            <button type="button" onClick={() => abort.current?.abort()} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Cancel</button>
-          ) : (
-            <button type="button" onClick={close} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Close</button>
-          )}
-          <button type="button" disabled={busy || !!blocked || (protect && !isPrint && (pw.length < 4 || pw !== pw2))} onClick={() => void go()} className="rounded-md bg-accent px-4 py-1.5 font-medium text-accent-text disabled:opacity-50">
+        <DialogActions>
+          {busy ? <Button onClick={() => abort.current?.abort()}>Cancel</Button> : <Button onClick={close}>Close</Button>}
+          <Button variant="primary" disabled={busy || !!blocked || (protect && !isPrint && (pw.length < 4 || pw !== pw2))} onClick={() => void go()}>
             {busy ? 'Working…' : isPrint ? 'Print' : 'Export'}
-          </button>
-        </div>
+          </Button>
+        </DialogActions>
       </div>
     </Modal>
   )

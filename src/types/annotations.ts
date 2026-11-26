@@ -164,8 +164,6 @@ export type Annotation =
   | FormFieldAnnotation
   | RedactionAnnotation
 
-export type AnnotationType = Annotation['type']
-
 /** Omit that distributes over a union, so discriminated variants keep their own fields. */
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
 

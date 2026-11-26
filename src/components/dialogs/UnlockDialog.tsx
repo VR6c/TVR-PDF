@@ -3,7 +3,9 @@ import { callWorker } from '../../lib/pdf/workerClient'
 import { useDocument } from '../../stores/document'
 import { useNotice } from '../../stores/notice'
 import { useUI } from '../../stores/ui'
+import { Button, DialogActions, inputClass } from '../common/Button'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 
 /** Makes an editable, unencrypted working copy of a password-protected PDF (the original file on disk is untouched). */
 export function UnlockDialog() {
@@ -32,12 +34,12 @@ export function UnlockDialog() {
       <form onSubmit={(e) => { e.preventDefault(); void go() }} className="flex flex-col gap-3">
         {!encrypted && <p>This document is not encrypted.</p>}
         <p className="text-muted">Creates an unencrypted working copy so you can edit pages, fill forms and export. <strong>The copy autosaved on this device will no longer be password-protected</strong>; your original file is not changed. Export with a password to protect the result.</p>
-        <input type="password" autoFocus autoComplete="off" aria-label="Document password" placeholder="Document password" value={password} onChange={(e) => setPassword(e.target.value)} className="rounded border border-border bg-bg px-2 py-1.5" />
-        {error && <p role="alert" className="text-red-600">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={close} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Cancel</button>
-          <button type="submit" disabled={busy || !encrypted || !password} className="rounded-md bg-accent px-4 py-1.5 font-medium text-accent-text disabled:opacity-50">{busy ? 'Unlocking…' : 'Unlock'}</button>
-        </div>
+        <input type="password" autoFocus autoComplete="off" aria-label="Document password" placeholder="Document password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
+        {error && <Notice kind="error" plain>{error}</Notice>}
+        <DialogActions>
+          <Button onClick={close}>Cancel</Button>
+          <Button type="submit" variant="primary" disabled={busy || !encrypted || !password}>{busy ? 'Unlocking…' : 'Unlock'}</Button>
+        </DialogActions>
       </form>
     </Modal>
   )

@@ -3,6 +3,7 @@ import { useExtras } from '../stores/extras'
 import { useOcr } from '../stores/ocr'
 import { useSignatures } from '../stores/signatures'
 import type { ExportResult, SignatureId } from '../types'
+import { downloadBlob } from './download'
 import { callWorker } from './pdf/workerClient'
 
 export const fmt = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(2)} MB` : `${(n / 1024).toFixed(1)} KB`)
@@ -51,14 +52,7 @@ export async function saveBytes(bytes: ArrayBuffer, suggestedName: string): Prom
       // fall through to the download fallback
     }
   }
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = suggestedName
-  a.style.display = 'none'
-  document.body.appendChild(a) // Firefox ignores click() on detached anchors
-  a.click()
-  setTimeout(() => { a.remove(); URL.revokeObjectURL(url) }, 60000)
+  downloadBlob(bytes, suggestedName, 'application/pdf')
   return 'downloaded'
 }
 

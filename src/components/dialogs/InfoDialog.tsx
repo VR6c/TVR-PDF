@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useExtras } from '../../stores/extras'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
+import { Button, DialogActions, inputClass } from '../common/Button'
 import { Modal } from '../common/Modal'
 
 const pdfDate = (s: unknown): string => {
@@ -58,10 +59,10 @@ export function InfoDialog() {
         <p className="text-muted">Edit properties. They are written into the PDF when you export.</p>
         {([['title', 'Title', 'Title'], ['author', 'Author', 'Author'], ['subject', 'Subject', 'Subject'], ['keywords', 'Keywords (comma separated)', 'Keywords']] as const).map(([k, label, pdfKey]) => (
           <label key={k} className="grid grid-cols-[8rem_1fr] items-center gap-x-3">{label}
-            <input value={field(k, pdfKey)} onChange={(e) => setDraft({ ...draft, [k]: e.target.value })} className="rounded border border-border bg-bg px-2 py-1" />
+            <input value={field(k, pdfKey)} onChange={(e) => setDraft({ ...draft, [k]: e.target.value })} className={inputClass} />
           </label>
         ))}
-        <div className="flex justify-end"><button type="submit" className="rounded-md bg-accent px-4 py-1.5 font-medium text-accent-text">Save properties</button></div>
+        <DialogActions><Button type="submit" variant="primary">Save properties</Button></DialogActions>
       </form>
     </Modal>
   )

@@ -4,7 +4,9 @@ import type { LineDiff } from '../../lib/compare'
 import { openPdf } from '../../lib/pdf/engine'
 import { useUI } from '../../stores/ui'
 import { useViewer } from '../../stores/viewer'
+import { Button, DialogActions } from '../common/Button'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 
 interface PageResult { page: number; text: LineDiff | null; pixels: number; image: string | null; note?: string }
 
@@ -80,7 +82,7 @@ export function CompareDialog() {
           <input type="file" accept="application/pdf,.pdf" aria-label="PDF to compare with" onChange={(e) => pick(e.target.files?.[0])} />
         </label>
         {busy && <p role="status">Comparing with {other}…</p>}
-        {error && <p role="alert" className="text-red-600">{error}</p>}
+        {error && <Notice kind="error" plain>{error}</Notice>}
         {results && (
           <>
             <p role="status" className="font-medium">{changed.length ? `${changed.length} of ${results.length} page${results.length === 1 ? '' : 's'} differ.` : 'No differences found.'}</p>
@@ -106,7 +108,7 @@ export function CompareDialog() {
             </ul>
           </>
         )}
-        <div className="flex justify-end"><button type="button" onClick={close} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Close</button></div>
+        <DialogActions><Button onClick={close}>Close</Button></DialogActions>
       </div>
     </Modal>
   )

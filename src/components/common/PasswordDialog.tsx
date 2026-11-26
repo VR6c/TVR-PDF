@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useOpener } from '../../stores/opener'
+import { Button, DialogActions } from './Button'
+import { Notice } from './Notice'
 
 export function PasswordDialog() {
   const pending = useOpener((s) => s.pendingPassword)
@@ -47,15 +49,11 @@ export function PasswordDialog() {
           onChange={(e) => setValue(e.target.value)}
           className="rounded-md border border-border bg-bg px-3 py-2"
         />
-        {pending?.wrong && <p role="alert" className="text-red-600">Incorrect password. Try again.</p>}
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={cancel} className="rounded-md px-3 py-1.5 hover:bg-surface-2">
-            Cancel
-          </button>
-          <button type="submit" disabled={!value} className="rounded-md bg-accent px-3 py-1.5 text-accent-text disabled:opacity-50">
-            Open
-          </button>
-        </div>
+        {pending?.wrong && <Notice kind="error" plain>Incorrect password. Try again.</Notice>}
+        <DialogActions>
+          <Button onClick={cancel}>Cancel</Button>
+          <Button type="submit" variant="primary" disabled={!value}>Open</Button>
+        </DialogActions>
       </form>
     </dialog>
   )

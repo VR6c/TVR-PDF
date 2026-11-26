@@ -5,7 +5,9 @@ import { useSignatures } from '../../stores/signatures'
 import { useTools } from '../../stores/tools'
 import { useUI } from '../../stores/ui'
 import { MAX_SAVED_SIGNATURES } from '../../types'
+import { Button, DialogActions, inputClass } from '../common/Button'
 import { Modal } from '../common/Modal'
+import { Notice } from '../common/Notice'
 
 type Method = 'draw' | 'type' | 'upload'
 const W = 480
@@ -167,7 +169,7 @@ export function SignatureDialog() {
           <div className="flex flex-col gap-2">
             <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Your name" aria-label="Typed signature" className="rounded border border-border bg-bg px-3 py-2" />
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
-              <select value={font} onChange={(e) => setFont(e.target.value)} aria-label="Signature font" className="rounded border border-border bg-bg px-2 py-1 text-text">{SCRIPT_FONTS.map(([n, f]) => <option key={n} value={f}>{n}</option>)}</select>
+              <select value={font} onChange={(e) => setFont(e.target.value)} aria-label="Signature font" className={`${inputClass} text-text`}>{SCRIPT_FONTS.map(([n, f]) => <option key={n} value={f}>{n}</option>)}</select>
               <label className="flex items-center gap-1">Size <input type="range" min={32} max={120} value={size} onChange={(e) => setSize(Number(e.target.value))} /></label>
               <label className="flex items-center gap-1">Ink <input type="color" value={color} onChange={(e) => setColor(e.target.value)} /></label>
             </div>
@@ -182,11 +184,11 @@ export function SignatureDialog() {
           </div>
         )}
         {full && <p className="text-xs text-muted">The vault is full. Delete a saved signature to add another.</p>}
-        {error && <p role="alert" className="text-red-600">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={close} className="rounded-md px-3 py-1.5 hover:bg-surface-2">Cancel</button>
-          <button type="button" disabled={full} onClick={() => void save()} className="rounded-md bg-accent px-4 py-1.5 font-medium text-accent-text disabled:opacity-50">Save and place</button>
-        </div>
+        {error && <Notice kind="error" plain>{error}</Notice>}
+        <DialogActions>
+          <Button onClick={close}>Cancel</Button>
+          <Button variant="primary" disabled={full} onClick={() => void save()}>Save and place</Button>
+        </DialogActions>
       </div>
     </Modal>
   )

@@ -10,6 +10,7 @@ import { useTools } from '../../stores/tools'
 import { useViewer } from '../../stores/viewer'
 import { useUI } from '../../stores/ui'
 import type { Annotation } from '../../types'
+import { inputClass } from '../common/Button'
 
 const SWATCHES = ['#e11d48', '#f97316', '#facc15', '#22c55e', '#2563eb', '#7c3aed', '#111827']
 const FONTS = ['Helvetica', 'Times New Roman', 'Courier New']
@@ -118,10 +119,10 @@ export function PropertiesPanel() {
       {hasText && (
         <>
           <Row label="Font size">
-            <input type="number" min={6} max={96} value={v.fontSize} onChange={(e) => change({ fontSize: Math.min(96, Math.max(6, Number(e.target.value) || 16)) })} className="rounded border border-border bg-bg px-2 py-1 text-text" />
+            <input type="number" min={6} max={96} value={v.fontSize} onChange={(e) => change({ fontSize: Math.min(96, Math.max(6, Number(e.target.value) || 16)) })} className={`${inputClass} text-text`} />
           </Row>
           <Row label="Font">
-            <select value={v.fontFamily} onChange={(e) => change({ fontFamily: e.target.value })} className="rounded border border-border bg-bg px-2 py-1 text-text">
+            <select value={v.fontFamily} onChange={(e) => change({ fontFamily: e.target.value })} className={`${inputClass} text-text`}>
               {FONTS.map((f) => <option key={f}>{f}</option>)}
             </select>
           </Row>
@@ -136,7 +137,7 @@ export function PropertiesPanel() {
       )}
       {type === 'stamp' && !selected && (
         <Row label="Stamp">
-          <select value={t.stamp} onChange={(e) => t.set({ stamp: e.target.value as typeof t.stamp })} className="rounded border border-border bg-bg px-2 py-1 text-text">
+          <select value={t.stamp} onChange={(e) => t.set({ stamp: e.target.value as typeof t.stamp })} className={`${inputClass} text-text`}>
             {STAMP_KINDS.map((k) => <option key={k}>{k}</option>)}
           </select>
         </Row>
@@ -145,11 +146,11 @@ export function PropertiesPanel() {
       {selected?.type === 'link' && (
         <>
           <Row label="Web or email address">
-            <input aria-label="Link address" placeholder="https://… or mailto:…" value={selected.url} onChange={(e) => useDocument.getState().update(selected.id, { url: e.target.value, targetPageId: null })} className="rounded border border-border bg-bg px-2 py-1 text-text" />
+            <input aria-label="Link address" placeholder="https://… or mailto:…" value={selected.url} onChange={(e) => useDocument.getState().update(selected.id, { url: e.target.value, targetPageId: null })} className={`${inputClass} text-text`} />
           </Row>
           {selected.url && !isSafeUrl(selected.url) && <p role="alert" className="text-xs text-red-600">Only http(s):// and mailto: addresses are allowed.</p>}
           <Row label="…or jump to page">
-            <select aria-label="Link target page" value={selected.targetPageId ?? ''} onChange={(e) => useDocument.getState().update(selected.id, { targetPageId: (e.target.value || null) as typeof selected.targetPageId, url: '' })} className="rounded border border-border bg-bg px-2 py-1 text-text">
+            <select aria-label="Link target page" value={selected.targetPageId ?? ''} onChange={(e) => useDocument.getState().update(selected.id, { targetPageId: (e.target.value || null) as typeof selected.targetPageId, url: '' })} className={`${inputClass} text-text`}>
               <option value="">None</option>
               {pages.map((p, i) => <option key={p.pageId} value={p.pageId}>Page {i + 1}</option>)}
             </select>
@@ -161,7 +162,7 @@ export function PropertiesPanel() {
           {!selected && <p className="text-xs text-muted">Drag an area on the page to add a fillable field. It becomes a real form field when you export.</p>}
           {!selected && (
             <Row label="Field type">
-              <select aria-label="Field type" value={t.fieldType} onChange={(e) => t.set({ fieldType: e.target.value as typeof t.fieldType })} className="rounded border border-border bg-bg px-2 py-1 text-text">
+              <select aria-label="Field type" value={t.fieldType} onChange={(e) => t.set({ fieldType: e.target.value as typeof t.fieldType })} className={`${inputClass} text-text`}>
                 <option value="text">Text</option><option value="checkbox">Checkbox</option><option value="dropdown">Dropdown</option>
               </select>
             </Row>
@@ -169,11 +170,11 @@ export function PropertiesPanel() {
           {selected?.type === 'field' && (
             <>
               <Row label={`Field name (${selected.fieldType})`}>
-                <input aria-label="Field name" value={selected.name} onChange={(e) => useDocument.getState().update(selected.id, { name: e.target.value })} className="rounded border border-border bg-bg px-2 py-1 text-text" />
+                <input aria-label="Field name" value={selected.name} onChange={(e) => useDocument.getState().update(selected.id, { name: e.target.value })} className={`${inputClass} text-text`} />
               </Row>
               {selected.fieldType === 'dropdown' && (
                 <Row label="Choices (one per line)">
-                  <textarea aria-label="Dropdown choices" rows={4} value={selected.options.join('\n')} onChange={(e) => useDocument.getState().update(selected.id, { options: e.target.value.split('\n') })} className="rounded border border-border bg-bg px-2 py-1 text-text" />
+                  <textarea aria-label="Dropdown choices" rows={4} value={selected.options.join('\n')} onChange={(e) => useDocument.getState().update(selected.id, { options: e.target.value.split('\n') })} className={`${inputClass} text-text`} />
                 </Row>
               )}
             </>
@@ -182,7 +183,7 @@ export function PropertiesPanel() {
       )}
       {t.tool === 'signature' && (
         <Row label="Signature to place">
-          <select value={t.signatureId ?? ''} onChange={(e) => t.set({ signatureId: (e.target.value || null) as typeof t.signatureId })} className="rounded border border-border bg-bg px-2 py-1 text-text">
+          <select value={t.signatureId ?? ''} onChange={(e) => t.set({ signatureId: (e.target.value || null) as typeof t.signatureId })} className={`${inputClass} text-text`}>
             <option value="">Choose…</option>
             {sigs.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
@@ -208,7 +209,7 @@ export function PropertiesPanel() {
                   const target = pages[Number(e.target.value) - 1]
                   if (target && target.pageId !== selected.pageId) useDocument.getState().moveToPage(selected.id, target.pageId, { x: 40, y: 40 })
                 }}
-                className="rounded border border-border bg-bg px-2 py-1 text-text"
+                className={`${inputClass} text-text`}
               >
                 {Array.from({ length: pageCount }, (_, i) => <option key={i} value={i + 1}>Page {i + 1}</option>)}
               </select>
