@@ -47,3 +47,4 @@ coverage
 .agents
 .claude/skills
 skills-lock.json
+pdf.txt
