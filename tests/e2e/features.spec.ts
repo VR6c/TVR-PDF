@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { PDFDocument } from 'pdf-lib'
 import { readFileSync, statSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
-import { bigDocument, fixtures, heavyImage, noSavePicker, openPdf, scanned, withForm } from './helpers'
+import { bigDocument, ccittMask, fixtures, heavyImage, noSavePicker, openPdf, scanned, withForm } from './helpers'
 
 test.beforeEach(async ({ page }) => {
   page.on('dialog', (d) => void d.accept())
@@ -100,4 +100,24 @@ test('17. Edit text replaces a line of existing page text and exports it', async
   const text = (await (await doc.getPage(1)).getTextContent()).items.map((i) => ('str' in i ? i.str : '')).join(' ')
   expect(text).toContain('Page one OMEGA')
   expect(errors).toEqual([])
+})
+
+test('18. renders CCITTFaxDecode ImageMask layers using self-hosted WASM decoders', async ({ page }) => {
+  const errors: string[] = []
+  const warnings: string[] = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  page.on('console', (m) => {
+    if (m.type() === 'warning' || m.type() === 'error') warnings.push(m.text())
+  })
+  await openPdf(page, await ccittMask())
+  const canvas = page.locator('[data-page="1"] canvas').first()
+  await expect.poll(async () => canvas.evaluate((el) => {
+    const c = el as HTMLCanvasElement
+    if (!c.width || !c.height) return 255
+    const ctx = c.getContext('2d')!
+    const px = ctx.getImageData(Math.floor(c.width / 2), Math.floor(c.height / 2), 1, 1).data
+    return Math.max(px[0], px[1], px[2])
+  })).toBeLessThan(32)
+  expect(errors).toEqual([])
+  expect(warnings.some((w) => w.includes('Jbig2Error') || w.includes('wasmUrl'))).toBe(false)
 })

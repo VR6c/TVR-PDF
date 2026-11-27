@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { PDFDocument, StandardFonts } from 'pdf-lib'
+import { PDFDocument, PDFName, PDFRawStream, StandardFonts } from 'pdf-lib'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -101,6 +101,35 @@ export async function bigDocument(pages: number): Promise<string> {
   }
   mkdirSync(dir, { recursive: true })
   const path = join(dir, `big-${pages}.pdf`)
+  writeFileSync(path, await doc.save())
+  return path
+}
+
+/** A PDF with a CCITTFaxDecode Group 4 ImageMask layer (how MRC scanners store black text masks). */
+export async function ccittMask(): Promise<string> {
+  // 8x8 solid black mask in CCITT Group 4 (/K -1): row 1 H(001)+W0(00110101)+B8(000101), rows 2-8 V(0)x2 each, EOFB.
+  const bits = '001' + '00110101' + '000101' + '1'.repeat(14) + '000000000001000000000001'
+  const padded = bits.padEnd(Math.ceil(bits.length / 8) * 8, '0')
+  const ccitt = new Uint8Array(padded.length / 8)
+  for (let i = 0; i < ccitt.length; i++) ccitt[i] = parseInt(padded.slice(i * 8, i * 8 + 8), 2)
+
+  const doc = await PDFDocument.create()
+  const page = doc.addPage([200, 200])
+  const mask = PDFRawStream.of(doc.context.obj({
+    Type: 'XObject',
+    Subtype: 'Image',
+    Width: 8,
+    Height: 8,
+    BitsPerComponent: 1,
+    ImageMask: true,
+    Filter: 'CCITTFaxDecode',
+    DecodeParms: { K: -1, Columns: 8 },
+    Length: ccitt.length,
+  }), ccitt)
+  page.node.setXObject(PDFName.of('M1'), doc.context.register(mask))
+  page.node.set(PDFName.of('Contents'), doc.context.register(doc.context.flateStream('q 0 0 0 rg 100 0 0 100 50 50 cm /M1 Do Q')))
+  mkdirSync(dir, { recursive: true })
+  const path = join(dir, 'ccitt-mask.pdf')
   writeFileSync(path, await doc.save())
   return path
 }

@@ -59,8 +59,12 @@ export default defineConfig({
         globIgnores: ['ocr/**'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: '/index.html',
-        // OCR engine + language data are large and optional: cached on first use, then available offline.
-        runtimeCaching: [{ urlPattern: ({ url }) => url.pathname.startsWith('/ocr/'), handler: 'CacheFirst', options: { cacheName: 'ocr-assets', cacheableResponse: { statuses: [200] } } }],
+        // OCR engine + language data and PDF.js CMap/font/ICC packs are large or optional: cached on first use.
+        // PDF.js WASM decoders (public/pdfjs/wasm) match globPatterns above and are precached for offline scans.
+        runtimeCaching: [
+          { urlPattern: ({ url }) => url.pathname.startsWith('/ocr/'), handler: 'CacheFirst', options: { cacheName: 'ocr-assets', cacheableResponse: { statuses: [200] } } },
+          { urlPattern: ({ url }) => url.pathname.startsWith('/pdfjs/'), handler: 'CacheFirst', options: { cacheName: 'pdfjs-assets', cacheableResponse: { statuses: [200] } } },
+        ],
       },
     }),
   ],

@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "predev": "node scripts/copy-ocr-assets.mjs",
-    "prebuild": "node scripts/copy-ocr-assets.mjs",
+    "predev": "node scripts/copy-ocr-assets.mjs && node scripts/copy-pdfjs-assets.mjs",
+    "prebuild": "node scripts/copy-ocr-assets.mjs && node scripts/copy-pdfjs-assets.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },

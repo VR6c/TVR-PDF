@@ -19,6 +19,17 @@ export interface OpenOptions {
 
 const failure = (code: AppError['code'], message: string) => err({ code, message })
 
+function pdfjsAssetUrl(dir: 'wasm' | 'cmaps' | 'standard_fonts' | 'iccs'): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  try {
+    const base = import.meta.env.BASE_URL ?? '/'
+    const url = new URL(`${base}pdfjs/${dir}/`, window.location.href)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /**
  * Opens a PDF entirely in the browser. PDF.js transfers the buffer to its worker,
  * so it gets a copy and the caller keeps the original bytes (needed later for
@@ -26,7 +37,18 @@ const failure = (code: AppError['code'], message: string) => err({ code, message
  */
 export async function openPdf(bytes: ArrayBuffer, opts: OpenOptions = {}): Promise<Result<PDFDocumentProxy>> {
   const { getDocument, PasswordResponses } = await loadPdfjs()
-  const task = getDocument({ data: new Uint8Array(bytes.slice(0)), password: opts.password })
+  const wasmUrl = pdfjsAssetUrl('wasm')
+  const cMapUrl = pdfjsAssetUrl('cmaps')
+  const standardFontDataUrl = pdfjsAssetUrl('standard_fonts')
+  const iccUrl = pdfjsAssetUrl('iccs')
+  const task = getDocument({
+    data: new Uint8Array(bytes.slice(0)),
+    password: opts.password,
+    ...(wasmUrl ? { wasmUrl } : {}),
+    ...(cMapUrl ? { cMapUrl, cMapPacked: true } : {}),
+    ...(standardFontDataUrl ? { standardFontDataUrl } : {}),
+    ...(iccUrl ? { iccUrl } : {}),
+  })
   opts.signal?.addEventListener('abort', () => void task.destroy(), { once: true })
   try {
     return ok(await task.promise)
